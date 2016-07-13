@@ -98,7 +98,6 @@ static void set_displayed_framebuffer(unsigned n)
 {
     if (n > 1 || !double_buffered) return;
 
-    vi.yres_virtual = gr_framebuffer[0].height * 2;
     vi.yoffset = n * gr_framebuffer[0].height;
     vi.bits_per_pixel = gr_framebuffer[0].pixel_bytes * 8;
     if (ioctl(fb_fd, FBIOPUT_VSCREENINFO, &vi) < 0) {
@@ -163,6 +162,19 @@ static GRSurface* fbdev_init(minui_backend* backend) {
     fb_fix_screeninfo fi;
     if (ioctl(fd, FBIOGET_FSCREENINFO, &fi) < 0) {
         perror("failed to get fb0 info (FBIOGET_FSCREENINFO)");
+        close(fd);
+        return NULL;
+    }
+
+    // We try to set to double buffering, but don't fail if we can't.
+    // Some devices have triple-bufferings, but work properly if used as double-buffered
+    vi.yres_virtual = vi.yres * 2;
+    if (ioctl(fb_fd, FBIOPUT_VSCREENINFO, &vi) < 0) {
+        perror("set double-buffering failed");
+    }
+
+    if (ioctl(fd, FBIOGET_VSCREENINFO, &vi) < 0) {
+        perror("failed to get fb0 info (FBIOGET_VSCREENINFO)");
         close(fd);
         return NULL;
     }
@@ -249,6 +261,7 @@ static GRSurface* fbdev_init(minui_backend* backend) {
     }
 
     /* check if we can use double buffering */
+#ifndef RECOVERY_GRAPHICS_FORCE_SINGLE_BUFFER
     if (vi.yres * fi.line_length * 2 <= fi.smem_len) {
         double_buffered = true;
         printf("double buffered\n");
@@ -258,6 +271,9 @@ static GRSurface* fbdev_init(minui_backend* backend) {
             gr_framebuffer[0].height * gr_framebuffer[0].row_bytes;
 
     } else {
+#else
+    {
+#endif
         double_buffered = false;
         printf("single buffered\n");
     }
