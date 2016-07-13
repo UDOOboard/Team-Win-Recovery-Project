@@ -329,7 +329,6 @@ LOCAL_ADDITIONAL_DEPENDENCIES := \
     mke2fs.conf \
     pigz \
     teamwin \
-    toolbox_symlinks \
     twrp \
     unpigz_symlink \
     fsck.fat \
@@ -579,7 +578,6 @@ include $(commands_recovery_local_path)/injecttwrp/Android.mk \
     $(commands_recovery_local_path)/libblkid/Android.mk \
     $(commands_recovery_local_path)/minuitwrp/Android.mk \
     $(commands_recovery_local_path)/openaes/Android.mk \
-    $(commands_recovery_local_path)/toolbox/Android.mk \
     $(commands_recovery_local_path)/libmincrypt/Android.mk \
     $(commands_recovery_local_path)/twrpTarMain/Android.mk \
     $(commands_recovery_local_path)/mtp/Android.mk \
