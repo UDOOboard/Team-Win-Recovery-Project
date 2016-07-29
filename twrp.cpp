@@ -118,6 +118,20 @@ int main(int argc, char **argv) {
 	gui_init();
 	printf("=> Linking mtab\n");
 	symlink("/proc/mounts", "/etc/mtab");
+	char fstab_current_device[30];
+    	char boot_prop_value[PROP_VALUE_MAX] = {0};
+        int ret = property_get("ro.root_device", boot_prop_value, "sd");
+        if (ret) {
+           sprintf(fstab_current_device, "/etc/twrp.fstab.%s", boot_prop_value);
+	   if (TWFunc::Path_Exists(fstab_current_device)) {
+		if (TWFunc::Path_Exists("/etc/twrp.fstab")) {
+			printf("Renaming regular /etc/twrp.fstab -> /etc/twrp.fstab.bak\n");
+			rename("/etc/twrp.fstab", "/etc/twrp.fstab.bak");
+		}
+		printf("Moving /etc/twrp.fstab -> %s\n", fstab_current_device);
+		rename(fstab_current_device, "/etc/twrp.fstab");
+	   }
+        }
 	if (TWFunc::Path_Exists("/etc/twrp.fstab")) {
 		if (TWFunc::Path_Exists("/etc/recovery.fstab")) {
 			printf("Renaming regular /etc/recovery.fstab -> /etc/recovery.fstab.bak\n");
